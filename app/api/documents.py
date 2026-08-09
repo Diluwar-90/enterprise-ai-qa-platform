@@ -1,33 +1,60 @@
 from typing import Annotated
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.db.session import async_session_maker
 from app.db.session import get_async_session as get_db_session
 from app.models.document import Document, DocumentStatus
 from app.schemas.document import DocumentResponse
+from app.services.document_processor import DocumentProcessor
 from app.services.document_storage import LocalDocumentStorage
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
 storage = LocalDocumentStorage(get_settings().DOCUMENT_STORAGE_PATH)
+processor = DocumentProcessor()
 
 ALLOWED_CONTENT_TYPES = {
     "application/pdf",
-    "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "text/plain",
 }
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
+async def process_document_background(document_id: UUID) -> None:
+    async with async_session_maker() as session:
+        document = await session.get(Document, document_id)
+
+        if document is None:
+            return
+
+        try:
+            await processor.process(
+                document=document,
+                db=session,
+            )
+        except ValueError as exc:
+            document.status = DocumentStatus.FAILED
+            document.error_message = str(exc)
+            await session.commit()
 
 @router.post(
     "/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED
 )
 async def upload_document(
+    background_tasks: BackgroundTasks,
     file: Annotated[UploadFile, File(...)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
 ):
@@ -61,5 +88,28 @@ async def upload_document(
     db.add(document)
     await db.commit()
     await db.refresh(document)
+
+    background_tasks.add_task(
+    process_document_background,
+    document.id,
+)
+
+    return document
+
+@router.get(
+    "/{document_id}",
+    response_model=DocumentResponse,
+)
+async def get_document(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_db_session)],
+) -> DocumentResponse:
+    document = await db.get(Document, document_id)
+
+    if document is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found.",
+        )
 
     return document
