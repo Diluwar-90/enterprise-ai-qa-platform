@@ -15,6 +15,10 @@ class Settings(BaseSettings):
         env_file=".env", env_file_encoding="utf-8", extra="ignore", case_sensitive=False
     )
 
+    LLM_PROVIDER: str = "openai"
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4o-mini"
+
 
 @lru_cache
 def get_settings() -> Settings:
