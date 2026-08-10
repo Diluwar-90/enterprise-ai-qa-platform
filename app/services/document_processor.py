@@ -4,12 +4,14 @@ from app.models.document import Document, DocumentStatus
 from app.models.document_chunk import DocumentChunk
 from app.services.chunking import DocumentChunker
 from app.services.document_parser import DocumentParser
+from app.services.embeddings.service import EmbeddingService
 
 
 class DocumentProcessor:
     def __init__(self) -> None:
         self.parser = DocumentParser()
         self.chunker = DocumentChunker()
+        self.embedding_service = EmbeddingService()
 
     async def process(
         self,
@@ -32,13 +34,18 @@ class DocumentProcessor:
 
         chunks = self.chunker.split(text)
 
+        embeddings = self.embedding_service.embed_documents(chunks)
+
         document_chunks = [
             DocumentChunk(
                 document_id=document.id,
                 chunk_index=index,
                 content=chunk,
+                embedding=embedding,
             )
-            for index, chunk in enumerate(chunks)
+            for index, (chunk, embedding) in enumerate(
+                zip(chunks, embeddings, strict=True)
+            )
         ]
 
         db.add_all(document_chunks)

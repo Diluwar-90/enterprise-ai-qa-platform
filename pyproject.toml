@@ -11,10 +11,13 @@ dependencies = [
     "greenlet>=3.5.4",
     "httpx2>=2.9.1",
     "langchain-text-splitters>=1.1.2",
+    "numpy>=2.5.2",
+    "pgvector>=0.5.0",
     "pydantic-settings>=2.15.0",
     "pypdf>=6.15.0",
     "python-docx>=1.2.0",
     "python-multipart>=0.0.32",
+    "sentence-transformers>=5.7.0",
     "sqlalchemy>=2.0.51",
     "uvicorn[standard]>=0.52.1",
 ]
