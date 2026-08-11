@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -21,7 +22,10 @@ async def test_rag_answer(
             rag_service.retrieval,
             "retrieve",
             new=AsyncMock(
-                return_value="[Chunk 0]\nEnterprise AI platform documentation.",
+                return_value=SimpleNamespace(
+                    context="[Chunk 0]\nEnterprise AI platform documentation.",
+                    chunks=[],
+                ),
             ),
         ):
             result = await rag_service.answer(

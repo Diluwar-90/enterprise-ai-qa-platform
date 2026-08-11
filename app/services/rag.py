@@ -15,11 +15,12 @@ class RAGService:
         query: str,
         limit: int = 5,
     ) -> str:
-        context = await self.retrieval.retrieve(
+        retrieval_result = await self.retrieval.retrieve(
             db=db,
             query=query,
             limit=limit,
         )
+        context = retrieval_result.context
 
         prompt = f"""
 You are an enterprise knowledge assistant.

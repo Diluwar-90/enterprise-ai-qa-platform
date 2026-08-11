@@ -44,5 +44,7 @@ async def test_retrieval(
         limit=1,
     )
 
-    assert "[Chunk 0]" in results
-    assert content in results
+    assert "[Chunk 0]" in results.context
+    assert len(results.chunks) == 1
+    assert results.chunks[0].chunk_index == 0
+    assert content in results.context

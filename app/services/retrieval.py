@@ -1,8 +1,17 @@
+from dataclasses import dataclass
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.document_chunk import DocumentChunk
 from app.services.context_builder import ContextBuilder
 from app.services.embeddings.service import EmbeddingService
 from app.services.vector_search import VectorSearchService
+
+
+@dataclass
+class RetrievalResult:
+    context: str
+    chunks: list[DocumentChunk]
 
 
 class RetrievalService:
@@ -16,7 +25,7 @@ class RetrievalService:
         db: AsyncSession,
         query: str,
         limit: int = 5,
-    ) -> str:
+    ) -> RetrievalResult:
         query_embedding = self.embedding_service.embed_text(query)
 
         chunks = await self.vector_search.search(
@@ -25,4 +34,9 @@ class RetrievalService:
             limit=limit,
         )
 
-        return self.context_builder.build(chunks)
+        context = self.context_builder.build(chunks)
+
+        return RetrievalResult(
+            context=context,
+            chunks=chunks,
+        )
