@@ -1,0 +1,11 @@
+Enterprise Knowledge Intelligence Platform
+
+The Enterprise Knowledge Intelligence Platform is an AI-powered enterprise knowledge system designed to help organizations search and understand internal documents.
+
+The platform allows users to upload enterprise documents. Documents are parsed into text, divided into smaller chunks, converted into vector embeddings, and stored in PostgreSQL using pgvector.
+
+When a user asks a question, the platform converts the question into an embedding and performs semantic similarity search against the stored document chunks. The most relevant chunks are then provided as context to a large language model.
+
+The platform uses Retrieval-Augmented Generation (RAG) to generate answers grounded in the organization's documents. If the retrieved documents do not contain sufficient information, the system should avoid inventing an answer and instead indicate that there is insufficient information.
+
+The current backend is built with Python, FastAPI, PostgreSQL, SQLAlchemy, pgvector, and an LLM service.
