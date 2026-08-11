@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_async_session as get_db_session
-from app.schemas.rag import RAGQueryRequest, RAGQueryResponse
+from app.schemas.rag import RAGQueryRequest, RAGQueryResponse, RAGSource
 from app.services.rag import RAGService
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
@@ -24,4 +24,16 @@ async def query_rag(
         query=request.query,
     )
 
-    return RAGQueryResponse(answer=answer, sources=retrieval_result.chunks,)
+    sources = [
+    RAGSource(
+        document_id=chunk.document_id,
+        filename=chunk.document.filename,
+        chunk_index=chunk.chunk_index,
+    )
+    for chunk in retrieval_result.chunks
+    ]
+
+    return RAGQueryResponse(
+    answer=answer,
+    sources=sources,
+    )

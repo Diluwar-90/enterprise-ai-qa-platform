@@ -4,9 +4,10 @@ from uuid import UUID, uuid4
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import DateTime, ForeignKey, Integer, Text
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.models.document import Document
 
 
 class DocumentChunk(Base):
@@ -24,6 +25,7 @@ class DocumentChunk(Base):
         nullable=False,
         index=True,
     )
+    document: Mapped["Document"] = relationship()
 
     chunk_index: Mapped[int] = mapped_column(
         Integer,

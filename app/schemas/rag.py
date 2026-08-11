@@ -8,8 +8,8 @@ class RAGQueryRequest(BaseModel):
 
 class RAGSource(BaseModel):
     document_id: UUID
+    filename: str
     chunk_index: int
-    content: str
 
     model_config = ConfigDict(from_attributes=True)
 

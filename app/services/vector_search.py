@@ -1,6 +1,7 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
 from app.models.document_chunk import DocumentChunk
 
@@ -14,6 +15,7 @@ class VectorSearchService:
 ) -> list[DocumentChunk]:
         statement = (
             select(DocumentChunk)
+            .options(selectinload(DocumentChunk.document))
             .where(DocumentChunk.embedding != None)
             .order_by(
                 DocumentChunk.embedding.cosine_distance(query_embedding)
