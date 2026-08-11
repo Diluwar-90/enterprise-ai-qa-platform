@@ -28,11 +28,13 @@ async def test_rag_answer(
                 ),
             ),
         ):
-            result = await rag_service.answer(
+            answer, retrieval_result = await rag_service.answer(
                 db=db_session,
                 query="What does the platform provide?",
                 limit=5,
             )
 
-    assert result == "The platform provides enterprise AI capabilities."
+    assert answer == "The platform provides enterprise AI capabilities."
+    assert retrieval_result.context == "[Chunk 0]\nEnterprise AI platform documentation."
+    assert retrieval_result.chunks == []
     mock_llm.return_value.generate.assert_awaited_once()

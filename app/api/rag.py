@@ -13,15 +13,15 @@ def get_rag_service() -> RAGService:
     return RAGService()  
 
 
-@router.post("/query")
+@router.post("/query",response_model=RAGQueryResponse)
 async def query_rag(
     request: RAGQueryRequest,
     db: Annotated[AsyncSession, Depends(get_db_session)],
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
 ) -> RAGQueryResponse:
-    answer = await rag_service.answer(
+    answer, retrieval_result = await rag_service.answer(
         db=db,
         query=request.query,
     )
 
-    return RAGQueryResponse(answer=answer)
+    return RAGQueryResponse(answer=answer, sources=retrieval_result.chunks,)

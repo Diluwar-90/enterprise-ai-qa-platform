@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.llm import LLMService
-from app.services.retrieval import RetrievalService
+from app.services.retrieval import RetrievalResult, RetrievalService
 
 
 class RAGService:
@@ -14,14 +14,13 @@ class RAGService:
         db: AsyncSession,
         query: str,
         limit: int = 5,
-    ) -> str:
+    ) -> tuple[str, RetrievalResult]:
         retrieval_result = await self.retrieval.retrieve(
             db=db,
             query=query,
             limit=limit,
         )
-        context = retrieval_result.context
-
+    
         prompt = f"""
 You are an enterprise knowledge assistant.
 
@@ -30,10 +29,10 @@ If the context does not contain enough information, say that you
 do not have enough information to answer.
 
 Context:
-{context}
+{retrieval_result.context}
 
 Question:
 {query}
 """
-
-        return await self.llm.generate(prompt)
+        answer = await self.llm.generate(prompt)
+        return answer, retrieval_result
