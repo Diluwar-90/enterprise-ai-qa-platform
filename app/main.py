@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.api.documents import router as documents_router
+from app.api.rag import router as rag_router
 from app.core.config import get_settings
 
 app = FastAPI(
@@ -9,6 +10,7 @@ app = FastAPI(
     description="Enterprise-grade GenAI platform with RAG and Agentic AI",
 )
 app.include_router(documents_router)
+app.include_router(rag_router)
 
 
 @app.get("/health")
