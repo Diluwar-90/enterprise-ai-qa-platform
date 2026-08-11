@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_async_session as get_db_session
+from app.schemas.rag import RAGQueryRequest, RAGQueryResponse
 from app.services.rag import RAGService
 
 router = APIRouter(prefix="/rag", tags=["RAG"])
@@ -14,13 +15,13 @@ def get_rag_service() -> RAGService:
 
 @router.post("/query")
 async def query_rag(
-    query: str,
+    request: RAGQueryRequest,
     db: Annotated[AsyncSession, Depends(get_db_session)],
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
-) -> dict[str, str]:
+) -> RAGQueryResponse:
     answer = await rag_service.answer(
         db=db,
-        query=query,
+        query=request.query,
     )
 
-    return {"answer": answer}
+    return RAGQueryResponse(answer=answer)
