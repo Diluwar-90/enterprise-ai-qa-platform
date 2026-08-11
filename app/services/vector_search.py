@@ -12,9 +12,9 @@ class VectorSearchService:
     db: AsyncSession,
     query_embedding: list[float],
     limit: int = 5,
-) -> list[DocumentChunk]:
+) -> list[tuple[DocumentChunk,float]]:
         statement = (
-            select(DocumentChunk)
+            select(DocumentChunk,DocumentChunk.embedding.cosine_distance(query_embedding),)
             .options(selectinload(DocumentChunk.document))
             .where(DocumentChunk.embedding != None)
             .order_by(
@@ -24,4 +24,7 @@ class VectorSearchService:
         )
 
         result = await db.execute(statement)
-        return result.scalars().all()
+        return [
+            (chunk, float(distance))
+            for chunk, distance in result.all()
+        ]

@@ -15,6 +15,7 @@ class RetrievalResult:
 
 
 class RetrievalService:
+    RELEVANCE_THRESHOLD = 0.6
     def __init__(self) -> None:
         self.embedding_service = EmbeddingService()
         self.vector_search = VectorSearchService()
@@ -28,11 +29,19 @@ class RetrievalService:
     ) -> RetrievalResult:
         query_embedding = self.embedding_service.embed_text(query)
 
-        chunks = await self.vector_search.search(
+        search_results = await self.vector_search.search(
             db=db,
             query_embedding=query_embedding,
             limit=limit,
         )
+
+        relevant_results = [
+            (chunk, distance)
+            for chunk, distance in search_results
+            if distance <= self.RELEVANCE_THRESHOLD
+        ]
+
+        chunks = [chunk for chunk, _distance in relevant_results]
 
         context = self.context_builder.build(chunks)
 

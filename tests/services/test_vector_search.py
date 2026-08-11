@@ -47,4 +47,8 @@ async def test_vector_search(
     )
 
     assert len(results) == 1
-    assert results[0].content == "Enterprise Knowledge Intelligence Platform"
+
+    result_chunk, distance = results[0]
+
+    assert result_chunk.content == "Enterprise Knowledge Intelligence Platform"
+    assert distance == pytest.approx(0.0, abs=0.001)

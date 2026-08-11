@@ -48,3 +48,43 @@ async def test_retrieval(
     assert len(results.chunks) == 1
     assert results.chunks[0].chunk_index == 0
     assert content in results.context
+
+@pytest.mark.asyncio
+async def test_retrieval_rejects_irrelevant_results(
+    db_session: AsyncSession,
+) -> None:
+    embedding_service = EmbeddingService()
+    retrieval_service = RetrievalService()
+
+    document = Document(
+        owner_id="11111111-1111-1111-1111-111111111111",
+        filename="irrelevant-test.txt",
+        content_type="text/plain",
+        file_size=10,
+        status=DocumentStatus.PROCESSED,
+        storage_path="test/irrelevant-test.txt",
+    )
+
+    db_session.add(document)
+    await db_session.flush()
+
+    content = "This document contains unrelated information."
+
+    chunk = DocumentChunk(
+        document_id=document.id,
+        chunk_index=0,
+        content=content,
+        embedding=embedding_service.embed_text(content),
+    )
+
+    db_session.add(chunk)
+    await db_session.commit()
+
+    results = await retrieval_service.retrieve(
+        db=db_session,
+        query="Completely unrelated question about quantum computing",
+        limit=1,
+    )
+
+    assert results.chunks == []
+    assert results.context == ""    
