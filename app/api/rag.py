@@ -37,3 +37,29 @@ async def query_rag(
     answer=answer,
     sources=sources,
     )
+
+@router.post(
+    "/hybrid-query",
+    response_model=RAGQueryResponse,
+)
+async def query_hybrid_rag(
+    request: RAGQueryRequest,
+    rag_service: Annotated[RAGService, Depends(get_rag_service)],
+) -> RAGQueryResponse:
+    answer, retrieval_result = await rag_service.answer_hybrid(
+        query=request.query,
+    )
+
+    sources = [
+        RAGSource(
+            document_id=chunk.document_id,
+            filename=chunk.document.filename,
+            chunk_index=chunk.chunk_index,
+        )
+        for chunk in retrieval_result.chunks
+    ]
+
+    return RAGQueryResponse(
+        answer=answer,
+        sources=sources,
+    )

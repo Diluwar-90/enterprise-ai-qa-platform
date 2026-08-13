@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
@@ -43,6 +44,7 @@ async def test_process_text_document(
     await db_session.commit()
 
     processor = DocumentProcessor()
+    processor.azure_search_sync.upload_document = MagicMock()
 
     chunks = await processor.process(
         document=document,
@@ -55,3 +57,4 @@ async def test_process_text_document(
     assert chunks[0].content == (
         "Enterprise Knowledge Intelligence Platform test content."
     )
+    assert processor.azure_search_sync.upload_document.call_count == len(chunks)

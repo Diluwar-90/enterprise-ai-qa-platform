@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.document import Document, DocumentStatus
 from app.models.document_chunk import DocumentChunk
+from app.services.azure_search_sync import AzureSearchSyncService
 from app.services.chunking import DocumentChunker
 from app.services.document_parser import DocumentParser
 from app.services.embeddings.service import EmbeddingService
@@ -12,6 +13,7 @@ class DocumentProcessor:
         self.parser = DocumentParser()
         self.chunker = DocumentChunker()
         self.embedding_service = EmbeddingService()
+        self.azure_search_sync = AzureSearchSyncService()
 
     async def process(
         self,
@@ -54,5 +56,10 @@ class DocumentProcessor:
         document.error_message = None
 
         await db.commit()
+        for chunk in document_chunks:
+            self.azure_search_sync.upload_document(
+                document=document,
+                chunk=chunk,
+            )
 
         return document_chunks

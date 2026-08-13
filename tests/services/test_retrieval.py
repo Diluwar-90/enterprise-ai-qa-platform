@@ -1,3 +1,6 @@
+from unittest.mock import MagicMock
+from uuid import uuid4
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -87,4 +90,36 @@ async def test_retrieval_rejects_irrelevant_results(
     )
 
     assert results.chunks == []
-    assert results.context == ""    
+    assert results.context == "" 
+
+@pytest.mark.asyncio
+async def test_retrieve_hybrid(
+    db_session: AsyncSession,
+) -> None:
+    chunk_id = uuid4()
+    document_id = uuid4()
+    retrieval_service = RetrievalService()
+    retrieval_service.azure_search.hybrid_search = MagicMock(
+        return_value=[
+            {
+                "id": str(chunk_id),
+                "document_id": str(document_id),
+                "chunk_index": 0,
+                "filename": "test_knowledge.txt",
+                "content": "Enterprise Knowledge Intelligence Platform",
+            }
+        ]
+    )
+
+    result = await retrieval_service.retrieve_hybrid(
+        query="What is the Enterprise Knowledge Intelligence Platform?",
+        limit=5,
+    )
+
+    assert len(result.chunks) == 1
+    assert result.chunks[0].content == (
+        "Enterprise Knowledge Intelligence Platform"
+    )
+    assert "[Chunk 0]" in result.context
+
+    retrieval_service.azure_search.hybrid_search.assert_called_once()                                                                                                                                                               

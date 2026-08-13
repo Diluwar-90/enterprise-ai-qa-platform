@@ -1,8 +1,11 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
+from app.services.azure_search import AzureSearchService
 from app.services.context_builder import ContextBuilder
 from app.services.embeddings.service import EmbeddingService
 from app.services.vector_search import VectorSearchService
@@ -19,7 +22,9 @@ class RetrievalService:
     def __init__(self) -> None:
         self.embedding_service = EmbeddingService()
         self.vector_search = VectorSearchService()
+        self.azure_search = AzureSearchService()
         self.context_builder = ContextBuilder()
+        
 
     async def retrieve(
         self,
@@ -42,6 +47,40 @@ class RetrievalService:
         ]
 
         chunks = [chunk for chunk, _distance in relevant_results]
+
+        context = self.context_builder.build(chunks)
+
+        return RetrievalResult(
+            context=context,
+            chunks=chunks,
+        )
+
+    async def retrieve_hybrid(
+        self,
+        query: str,
+        limit: int = 5,
+    ) -> RetrievalResult:
+        query_embedding = self.embedding_service.embed_text(query)
+
+        results = self.azure_search.hybrid_search(
+            query=query,
+            query_embedding=query_embedding,
+            limit=limit,
+        )
+
+        chunks = [
+            DocumentChunk(
+                id=UUID(result["id"]),
+                document_id=UUID(result["document_id"]),
+                chunk_index=result["chunk_index"],
+                content=result["content"],
+                document=Document(
+                    id=UUID(result["document_id"]),
+                    filename=result["filename"],
+                ),
+            )
+            for result in results
+        ]
 
         context = self.context_builder.build(chunks)
 
