@@ -1,4 +1,5 @@
 from app.agents.graph import build_agent_graph
+from app.core.exceptions import AgentExecutionError
 
 
 class AgentService:
@@ -6,10 +7,16 @@ class AgentService:
         self.graph = build_agent_graph()
 
     async def run(self, query: str) -> str:
-        result = await self.graph.ainvoke(
-            {
-                "query": query,
-            }
-        )
+        try:
+            result = await self.graph.ainvoke(
+                {
+                    "query": query,
+                }
+            )
 
-        return result["answer"]
+            return result["answer"]
+
+        except Exception as exc:
+            raise AgentExecutionError(
+                "Agent execution failed."
+            ) from exc
