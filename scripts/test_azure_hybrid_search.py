@@ -6,7 +6,7 @@ def main() -> None:
     embedding_service = EmbeddingService()
     search_service = AzureSearchService()
 
-    query = "What is the Enterprise Knowledge Intelligence Platform?"
+    query = "What is the company's vacation policy?"
 
     query_embedding = embedding_service.embed_text(query)
 
