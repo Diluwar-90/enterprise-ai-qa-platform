@@ -1,0 +1,9 @@
+from pydantic import BaseModel, Field
+
+
+class AgentQueryRequest(BaseModel):
+    query: str = Field(min_length=1)
+
+
+class AgentQueryResponse(BaseModel):
+    answer: str                                                                                                                             

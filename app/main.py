@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from app.api.agent import router as agent_router
 from app.api.documents import router as documents_router
 from app.api.rag import router as rag_router
 from app.core.config import get_settings
@@ -26,6 +27,7 @@ async def llm_generation_error_handler(
 
 app.include_router(documents_router)
 app.include_router(rag_router)
+app.include_router(agent_router)
 
 
 @app.get("/health")
