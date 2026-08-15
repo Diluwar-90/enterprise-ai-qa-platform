@@ -11,18 +11,12 @@ async def test_agent_graph_knowledge_route() -> None:
 
     with (
         patch(
-            "app.agents.nodes.RetrievalService.retrieve_hybrid",
-            new=AsyncMock(
-                return_value=type(
-                    "RetrievalResult",
-                    (),
-                    {
-                        "context": (
-                            "[Chunk 0]\n"
-                            "Enterprise Knowledge Intelligence Platform"
-                        )
-                    },
-                )(),
+            "app.agents.nodes.RetrievalTool.search",
+           new=AsyncMock(
+                return_value=(
+                    "[Chunk 0]\n"
+                     "Enterprise Knowledge Intelligence Platform"
+                ),
             ),
         ),
         patch(
@@ -58,7 +52,7 @@ async def test_agent_graph_direct_route() -> None:
 
     with (
         patch(
-            "app.agents.nodes.RetrievalService.retrieve_hybrid",
+            "app.agents.nodes.RetrievalTool.search",
             new=AsyncMock(),
         ) as mock_retrieve,
         patch(

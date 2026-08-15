@@ -1,26 +1,35 @@
 from app.agents.state import AgentState
+from app.agents.tools.retrieval import RetrievalTool
 from app.services.llm import LLMService
-from app.services.retrieval import RetrievalService
 
 
 class AgentNodes:
     def __init__(self) -> None:
-        self.retrieval = RetrievalService()
+        self.retrieval = RetrievalTool()
         self.llm = LLMService()
 
     async def retrieve(self, state: AgentState) -> AgentState:
-        result = await self.retrieval.retrieve_hybrid(
-            query=state.query,
-            limit=5,
-        )
-
-        state.context = result.context
+        try:
+            context = await self.retrieval.search(
+                query=state.query,
+                limit=5,
+            )
+        except RuntimeError as exc:
+            return {
+                "context": "",
+                "error": str(exc),
+            }
 
         return {
-             "context": result.context,
-        }
+        "context": context,
+    }
 
     async def generate(self, state: AgentState) -> AgentState:
+        if state.error:
+            return {
+            "answer": "Unable to retrieve knowledge at this time.",
+        }
+
         if state.route == "knowledge" and not state.context.strip():
             answer = "I do not have enough information to answer."
             return {

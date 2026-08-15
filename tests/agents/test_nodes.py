@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -10,14 +10,14 @@ from app.agents.state import AgentState
 async def test_retrieve_node() -> None:
     nodes = AgentNodes()
 
-    retrieval_result = MagicMock()
-    retrieval_result.context = (
+    retrieval_result = AsyncMock()
+    retrieval_result = (
         "[Chunk 0]\nEnterprise Knowledge Intelligence Platform"
     )
 
     with patch.object(
         nodes.retrieval,
-        "retrieve_hybrid",
+        "search",
         new=AsyncMock(return_value=retrieval_result),
     ) as mock_retrieve:
         state = AgentState(
@@ -109,3 +109,53 @@ def test_route_direct_query() -> None:
     result = nodes.route(state)
 
     assert result == {"route": "direct"}
+
+@pytest.mark.asyncio
+async def test_retrieve_node_handles_tool_failure() -> None:
+    nodes = AgentNodes()
+
+    with patch.object(
+        nodes.retrieval,
+        "search",
+        new=AsyncMock(
+            side_effect=RuntimeError("Retrieval tool failed."),
+        ),
+    ) as mock_retrieve:
+        state = AgentState(
+            query="What is the platform?"
+        )
+
+        result = await nodes.retrieve(state)
+
+    mock_retrieve.assert_awaited_once_with(
+        query="What is the platform?",
+        limit=5,
+    )
+
+    assert result == {
+        "context": "",
+        "error": "Retrieval tool failed.",
+    }
+
+@pytest.mark.asyncio
+async def test_generate_node_with_retrieval_error() -> None:
+    nodes = AgentNodes()
+
+    with patch.object(
+        nodes.llm,
+        "generate",
+        new=AsyncMock(),
+    ) as mock_generate:
+        state = AgentState(
+            query="What is the platform?",
+            route="knowledge",
+            error="Retrieval tool failed.",
+        )
+
+        result = await nodes.generate(state)
+
+    assert result == {
+        "answer": "Unable to retrieve knowledge at this time.",
+    }
+
+    mock_generate.assert_not_awaited()
