@@ -40,6 +40,7 @@ jobs:
     env:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
       REDIS_URL: redis://localhost:6379/0
+      OPENAI_API_KEY: ci-test-key
 
     steps:
       - name: Checkout repository
@@ -57,6 +58,9 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --dev
+
+      - name: Run database migrations
+        run: uv run alembic upgrade head
 
       - name: Ruff check
         run: uv run ruff check .
