@@ -1,3 +1,7 @@
+import os
+
+os.environ["REDIS_URL"] = "redis://localhost:6379/0"
+
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 

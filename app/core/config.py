@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     AZURE_OPENAI_DEPLOYMENT: str = ""
     AZURE_OPENAI_API_VERSION: str = "2024-10-21"
 
+    REDIS_URL: str = "redis://redis:6379/0"
+
+    RATE_LIMIT_REQUESTS: int = 30
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+
 
 @lru_cache
 def get_settings() -> Settings:
