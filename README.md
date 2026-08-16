@@ -74,20 +74,45 @@ Implemented and verified:
 * pytest-asyncio
 * Ruff
 
-### GenAI & Infrastructure Stack
+### GenAI & AI Engineering
 
-* LangChain
+* RAG (Retrieval-Augmented Generation)
+* Agentic AI
 * LangGraph
 * Azure OpenAI
 * Azure AI Search
-* Redis
-* Docker
-* Kubernetes / AKS
-* LangSmith
+* Enterprise Retrieval
+* SQL Agent
+* Prompt-driven workflows
+
+### Security & Reliability
+
+* HITL (Human-in-the-Loop)
+* SQL Guardrails
+* Sensitive-data protection
+* Destructive operation protection
+* Redis caching
+* Rate Limiting
+* Failure fallback
+* LLM failure handling
+* Agent failure handling
+* Request ID tracking
+* Structured logging
+
+### Testing & Quality
+
+* pytest
+* pytest-asyncio
+* API testing
+* Agent testing
+* RAG/retrieval testing
+* Redis integration testing
+* Regression testing
+* Ruff
 
 ## Project Architecture
 
-The platform is being designed around the following major components:
+The platform is built around a production-oriented GenAI architecture combining RAG, Agentic AI, security guardrails, human approval, caching, rate limiting, failure handling, and observability.
 
 ```text
 Enterprise Knowledge Intelligence Platform
@@ -96,29 +121,41 @@ Enterprise Knowledge Intelligence Platform
 │
 ├── PostgreSQL
 │
-├── Document Ingestion
-│
-├── Document Processing
-│
-├── Knowledge Retrieval
+├── Document Ingestion & Processing
 │
 ├── RAG Pipeline
+│   ├── Document Retrieval
+│   ├── Context Building
+│   ├── Azure AI Search
+│   └── Azure OpenAI
 │
-├── Agentic AI Workflows
+├── Agentic AI
+│   ├── LangGraph Workflows
+│   ├── Action Classification
+│   ├── Retrieval Tool
+│   └── SQL Tool
 │
-├── Enterprise Tools
+├── Security & Guardrails
+│   ├── SQL Guardrails
+│   ├── Read-Only SQL Enforcement
+│   ├── Sensitive-Data Protection
+│   ├── Destructive Operation Protection
+│   └── HITL (Human-in-the-Loop)
 │
-├── Redis
-│
-├── Azure OpenAI
-│
-├── Azure AI Search
+├── Reliability & Performance
+│   ├── Redis Response Caching
+│   ├── Rate Limiting
+│   ├── Cache Failure Fallback
+│   ├── Rate-Limiter Failure Fallback
+│   ├── LLM Failure Handling
+│   └── Agent Failure Handling
 │
 └── Observability
-    └── LangSmith
-```
+    ├── Request ID Tracking
+    ├── Request Duration Logging
+    └── Structured Error Logging
 
-Components will be implemented progressively rather than all at once.
+``` 
 
 ## Project Structure
 
@@ -128,28 +165,28 @@ enterprise-knowledge-intelligence-platform/
 ├── app/
 │   ├── api/
 │   ├── agents/
+│   │   └── tools/
 │   ├── core/
 │   ├── db/
-│   ├── middleware/
 │   ├── models/
-│   ├── rag/
-│   ├── repositories/
 │   ├── schemas/
-│   ├── services/
-│   └── tools/
+│   ├── repositories/
+│   └── services/
 │
 ├── alembic/
 │   └── versions/
 │
 ├── tests/
-│
-├── docs/
-├── scripts/
+│   ├── agents/
+│   ├── api/
+│   ├── integration/
+│   └── services/
 │
 ├── .env.example
 ├── .gitignore
 ├── alembic.ini
-├── main.py
+├── docker-compose.yml
+├── Dockerfile
 ├── pyproject.toml
 ├── README.md
 └── uv.lock
@@ -161,7 +198,8 @@ enterprise-knowledge-intelligence-platform/
 
 * Python 3.13
 * uv
-* PostgreSQL 15+
+* PostgreSQL
+* Docker / Docker Compose
 
 ### Install dependencies
 
@@ -215,7 +253,7 @@ The current development database uses PostgreSQL with asynchronous SQLAlchemy se
 
 Current migration head:
 
-```text
+```bash
 86ff295bd3c7
 ```
 
@@ -334,7 +372,7 @@ Implemented:
 
 **Status: Complete**
 
-### Stage 7 — Security & Human-in-the-Loop
+### Stage 7 — Security, Guardrails & Human-in-the-Loop
 
 Implemented:
 
@@ -376,7 +414,7 @@ Implemented:
 
 **Status: Complete**
 
-### Stage 9 — Production Reliability, Security & Observability
+### Stage 9 — Production Reliability, Rate Limiting, Caching & Observability
 
 Implemented:
 
@@ -418,23 +456,6 @@ Planned:
 * Final portfolio cleanup
 
 **Status: Planned**
-
-### Future Stages
-
-* Embedding generation
-* Azure AI Search integration
-* RAG pipeline
-* Retrieval evaluation
-* LangChain integration
-* LangGraph agent workflows
-* Enterprise tools
-* Redis-based state and caching
-* Guardrails and security
-* Observability with LangSmith
-* Dockerization
-* Kubernetes / AKS deployment
-* Production CI/CD
-* Performance and reliability engineering
 
 ## Engineering Goals
 
