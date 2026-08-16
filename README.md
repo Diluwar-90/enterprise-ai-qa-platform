@@ -6,7 +6,7 @@ The project is being developed incrementally as an interview-ready portfolio pro
 
 ## Current Status
 
-**Stage 2 — Backend Foundation & Database Layer: Complete**
+**Stage 9 — Production Reliability, Security & Observability: Complete**
 
 Implemented and verified:
 
@@ -16,16 +16,46 @@ Implemented and verified:
 * Health check endpoint
 * Pydantic Settings configuration
 * Environment-based configuration
-* PostgreSQL 15
+* PostgreSQL
 * SQLAlchemy 2.x Async
 * `asyncpg`
 * Async database sessions
-* Database dependency
 * Alembic migrations
-* User database model
+* Document ingestion and processing
+* Embedding generation
+* Azure OpenAI integration
+* Azure AI Search integration
+* RAG pipeline
+* LangGraph agent workflows
+* Retrieval and SQL tools
+* SQL guardrails
+* Sensitive-data classification
+* Human-in-the-loop approval
+* Redis Docker infrastructure
+* Redis service layer
+* Redis integration testing
+* Agent response caching
+* Redis-backed API rate limiting
+* Request ID propagation
+* Request duration logging
+* LLM error handling
+* Agent error handling
+* Redis failure fallback
+* Destructive SQL protection
+* Sensitive-data access protection
+* Docker verification
 * Pytest
 * Ruff
-* Git repository
+
+### Verification
+
+* 111 tests passed
+* Ruff checks passed
+* Docker API verified
+* `/health` endpoint verified
+* Agent query endpoint verified
+* Sensitive-data HITL verified
+* Destructive operation blocking verified
 
 ## Technology Stack
 
@@ -44,9 +74,7 @@ Implemented and verified:
 * pytest-asyncio
 * Ruff
 
-### Planned GenAI Stack
-
-The following technologies will be introduced in later stages:
+### GenAI & Infrastructure Stack
 
 * LangChain
 * LangGraph
@@ -201,36 +229,193 @@ uv run alembic current
 
 ### Stage 1 — Project Foundation
 
-* FastAPI foundation
-* Configuration
-* Health endpoint
-* Testing
-* Code quality tooling
+Implemented:
+
+* Python 3.13 project setup
+* `uv` package manager
+* FastAPI application foundation
+* Application configuration
+* Pydantic Settings
+* Environment-based configuration
+* Health check endpoint
+* Basic project structure
+* Pytest configuration
+* Ruff configuration
+* Git repository setup
 
 **Status: Complete**
 
-### Stage 2 — Database Foundation
+### Stage 2 — Backend & Database Foundation
 
-* PostgreSQL
-* SQLAlchemy Async
-* Database sessions
-* Alembic
-* User model
+Implemented:
+
+* PostgreSQL database
+* SQLAlchemy 2.x Async
+* `asyncpg`
+* Async database sessions
+* Database dependency injection
+* User database model
+* Alembic configuration
+* Database migrations
+* Initial migration workflow
+* Database integration tests
 
 **Status: Complete**
 
-### Stage 3 — Enterprise Document Ingestion Pipeline
+### Stage 3 — Enterprise Document Ingestion
 
-Planned capabilities:
+Implemented:
 
-* Document upload
+* Document upload API
 * File validation
 * Document metadata
-* Document extraction
-* Chunking
-* Document processing pipeline
+* Document persistence
+* Document parsing
+* PDF document processing
+* DOCX document processing
+* Text extraction
+* Document chunking
+* Document processing service
 * Persistent document lifecycle
-* Background processing foundations
+* Document processing tests
+
+**Status: Complete**
+
+### Stage 4 — Embeddings & Vector Search
+
+Implemented:
+
+* Local embedding generation
+* Sentence Transformer integration
+* Embedding service abstraction
+* Vector search foundations
+* PostgreSQL vector storage
+* Retrieval service
+* Vector search service
+* Embedding and retrieval tests
+
+**Status: Complete**
+
+### Stage 5 — RAG Pipeline
+
+Implemented:
+
+* Azure OpenAI integration
+* Azure AI Search integration
+* Knowledge retrieval
+* Context building
+* RAG pipeline
+* Retrieval service
+* Context generation
+* LLM response generation
+* RAG service tests
+* Azure service tests
+
+**Status: Complete**
+
+### Stage 6 — Agentic AI
+
+Implemented:
+
+* LangGraph agent workflow
+* Agent graph
+* Agent nodes
+* Agent state management
+* Retrieval tool
+* SQL tool
+* SQL agent
+* Agent execution service
+* Action classification
+* Agent API
+* Agent service tests
+* Agent graph tests
+* Agent node tests
+* Tool tests
+
+**Status: Complete**
+
+### Stage 7 — Security & Human-in-the-Loop
+
+Implemented:
+
+* SQL guardrails
+* Read-only SQL enforcement
+* Destructive SQL protection
+* Multiple SQL statement protection
+* Sensitive column detection
+* Sensitive-data classification
+* Human-in-the-loop approval
+* Approval status handling
+* Sensitive-data access protection
+* SQL security tests
+* HITL tests
+* API security tests
+
+**Status: Complete**
+
+### Stage 8 — Production Backend Integration
+
+Implemented:
+
+* Production-oriented FastAPI API layer
+* Agent query API
+* Request validation
+* Centralized application exceptions
+* LLM error handling
+* Agent execution error handling
+* API error handlers
+* Request ID generation
+* Request ID propagation
+* Dockerfile
+* Docker Compose
+* PostgreSQL container
+* API container
+* Integration testing
+* API testing
+* Health endpoint testing
+
+**Status: Complete**
+
+### Stage 9 — Production Reliability, Security & Observability
+
+Implemented:
+
+* Redis Docker infrastructure
+* Redis service layer
+* Redis integration testing
+* Agent response caching
+* Normalized cache keys
+* SHA-256 cache keys
+* Configurable cache TTL
+* Redis-backed API rate limiting
+* Configurable rate-limit window
+* Request ID tracking
+* Request duration measurement
+* Structured request logging
+* LLM failure handling
+* Agent failure handling
+* Redis cache failure fallback
+* Redis rate-limiter failure fallback
+* Sensitive-data protection
+* Destructive operation blocking
+* Production Docker verification
+* Full regression testing
+
+**Status: Complete**
+
+### Stage 10 — Final Production Readiness
+
+Planned:
+
+* Production deployment architecture
+* Kubernetes / AKS readiness
+* CI/CD pipeline
+* Production observability
+* Performance optimization
+* Load testing
+* Deployment documentation
+* Final architecture documentation
+* Final portfolio cleanup
 
 **Status: Planned**
 
