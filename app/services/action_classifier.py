@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from typing import Literal
 
@@ -25,7 +26,7 @@ class ActionClassifier:
         normalized_query = query.lower()
 
         if any(
-            column in normalized_query
+            re.search(rf"\b{column}\b", normalized_query)
             for column in self.SENSITIVE_COLUMNS
         ):
             return ActionClassification(
