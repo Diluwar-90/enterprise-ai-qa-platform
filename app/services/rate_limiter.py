@@ -1,5 +1,9 @@
+import logging
+
 from app.core.config import get_settings
 from app.services.redis import RedisService
+
+logger = logging.getLogger(__name__)
 
 
 class RateLimiter:
@@ -15,25 +19,35 @@ class RateLimiter:
     async def is_allowed(self, client_key: str) -> bool:
         key = f"{self.PREFIX}{client_key}"
 
-        current = await self.redis.get(key)
+        try:
+            current = await self.redis.get(key)
 
-        if current is None:
+            if current is None:
+                await self.redis.set(
+                    key,
+                    "1",
+                    expire_seconds=self.window_seconds,
+                )
+                return True
+
+            request_count = int(current)
+
+            if request_count >= self.max_requests:
+                return False
+
             await self.redis.set(
                 key,
-                "1",
+                str(request_count + 1),
                 expire_seconds=self.window_seconds,
             )
+
             return True
 
-        request_count = int(current)
-
-        if request_count >= self.max_requests:
-            return False
-
-        await self.redis.set(
-            key,
-            str(request_count + 1),
-            expire_seconds=self.window_seconds,
-        )
-
-        return True
+        except Exception:
+            logger.exception(
+                "Redis rate limiter unavailable; allowing request",
+                extra={
+                    "client_key": client_key,
+                },
+            )
+            return True

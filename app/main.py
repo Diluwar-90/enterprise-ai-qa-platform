@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
@@ -8,6 +10,8 @@ from app.core.config import get_settings
 from app.core.exceptions import AgentExecutionError
 from app.core.middleware import add_request_id, rate_limit_request
 from app.services.llm import LLMGenerationError
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=get_settings().APP_NAME,
@@ -22,6 +26,15 @@ async def llm_generation_error_handler(
     request: Request,
     exc: LLMGenerationError,
 ) -> JSONResponse:
+    logger.exception(
+        "LLM generation failed",
+        extra={
+            "request_id": request.state.request_id,
+            "path": request.url.path,
+            "method": request.method,
+        },
+    )
+
     return JSONResponse(
         status_code=503,
         content={
@@ -34,6 +47,15 @@ async def agent_execution_error_handler(
     request: Request,
     exc: AgentExecutionError,
 ) -> JSONResponse:
+    logger.exception(
+        "Agent execution failed",
+        extra={
+            "request_id": request.state.request_id,
+            "path": request.url.path,
+            "method": request.method,
+        },
+    )
+    
     return JSONResponse(
         status_code=503,
         content={

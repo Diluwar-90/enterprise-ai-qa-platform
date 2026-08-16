@@ -46,4 +46,11 @@ class LLMService:
 
         
 
-        return response.choices[0].message.content or ""
+        content =  response.choices[0].message.content or ""
+
+        if not content:
+            raise LLMGenerationError(
+                f"LLM returned an empty response using provider '{self.provider}'."
+        )
+
+        return content

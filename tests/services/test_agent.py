@@ -145,3 +145,104 @@ async def test_agent_service_caches_sql_read_response() -> None:
     )
 
     mock_redis.set.assert_awaited_once()
+
+@pytest.mark.asyncio
+async def test_agent_service_continues_when_redis_get_fails() -> None:
+    mock_graph = MagicMock()
+
+    mock_graph.ainvoke = AsyncMock(
+        return_value={
+            "query": "What is the platform?",
+            "answer": "It is an enterprise knowledge platform.",
+            "approval_required": False,
+            "approval_status": "not_required",
+            "action": None,
+        },
+    )
+
+    mock_redis = MagicMock()
+    mock_redis.get = AsyncMock(
+        side_effect=ConnectionError("Redis unavailable"),
+    )
+    mock_redis.set = AsyncMock()
+
+    with (
+        patch(
+            "app.services.agent.build_agent_graph",
+            return_value=mock_graph,
+        ),
+        patch(
+            "app.services.agent.RedisService",
+            return_value=mock_redis,
+        ),
+    ):
+        service = AgentService()
+
+        result = await service.run(
+            "What is the platform?",
+        )
+
+    assert result == {
+        "answer": "It is an enterprise knowledge platform.",
+        "approval_required": False,
+        "approval_status": "not_required",
+        "action": None,
+    }
+
+    mock_redis.get.assert_awaited_once()
+    mock_graph.ainvoke.assert_awaited_once_with(
+        {
+            "query": "What is the platform?",
+        }
+    )
+
+@pytest.mark.asyncio
+async def test_agent_service_continues_when_redis_set_fails() -> None:
+    mock_graph = MagicMock()
+
+    mock_graph.ainvoke = AsyncMock(
+        return_value={
+            "query": "How many documents are in the system?",
+            "answer": "There are 5 documents.",
+            "approval_required": False,
+            "approval_status": "not_required",
+            "action": "sql_read",
+        },
+    )
+
+    mock_redis = MagicMock()
+    mock_redis.get = AsyncMock(return_value=None)
+    mock_redis.set = AsyncMock(
+        side_effect=ConnectionError("Redis unavailable"),
+    )
+
+    with (
+        patch(
+            "app.services.agent.build_agent_graph",
+            return_value=mock_graph,
+        ),
+        patch(
+            "app.services.agent.RedisService",
+            return_value=mock_redis,
+        ),
+    ):
+        service = AgentService()
+
+        result = await service.run(
+            "How many documents are in the system?",
+        )
+
+    assert result == {
+        "answer": "There are 5 documents.",
+        "approval_required": False,
+        "approval_status": "not_required",
+        "action": "sql_read",
+    }
+
+    mock_redis.get.assert_awaited_once()
+    mock_redis.set.assert_awaited_once()
+    mock_graph.ainvoke.assert_awaited_once_with(
+        {
+            "query": "How many documents are in the system?",
+        }
+    )

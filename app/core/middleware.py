@@ -1,4 +1,5 @@
 import logging
+import time
 from uuid import uuid4
 
 from fastapi import Request
@@ -16,6 +17,8 @@ async def add_request_id(request: Request, call_next):
     )
 
     request.state.request_id = request_id
+
+    start_time = time.perf_counter()
 
     logger.info(
         "Request started",
@@ -37,6 +40,10 @@ async def add_request_id(request: Request, call_next):
             "method": request.method,
             "path": request.url.path,
             "status_code": response.status_code,
+            "duration_ms": round(
+            (time.perf_counter() - start_time) * 1000,
+            2,
+        ),
         },
     )
 

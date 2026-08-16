@@ -16,7 +16,10 @@ class AgentService:
         cache_key = AgentCache.build_key(query)
 
         try:
-            cached = await self.redis.get(cache_key)
+            try:
+                cached = await self.redis.get(cache_key)
+            except ConnectionError:
+                cached = None
 
             if cached is not None:
                 return json.loads(cached)
@@ -41,11 +44,15 @@ class AgentService:
             }
 
             if AgentCache.should_cache(response):
-                await self.redis.set(
-                    cache_key,
-                    json.dumps(response),
-                    expire_seconds=AgentCache.TTL_SECONDS,
-                )
+                try:
+
+                    await self.redis.set(
+                        cache_key,
+                        json.dumps(response),
+                        expire_seconds=AgentCache.TTL_SECONDS,
+                    )
+                except ConnectionError:
+                    pass
 
             return response
 

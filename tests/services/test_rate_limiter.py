@@ -71,3 +71,21 @@ async def test_request_at_limit_is_rejected() -> None:
 
     assert result is False
     mock_redis.set.assert_not_awaited()
+
+@pytest.mark.asyncio
+async def test_redis_failure_allows_request() -> None:
+    mock_redis = MagicMock()
+    mock_redis.get = AsyncMock(
+        side_effect=ConnectionError("Redis unavailable")
+    )
+    mock_redis.set = AsyncMock()
+
+    with patch(
+        "app.services.rate_limiter.RedisService",
+        return_value=mock_redis,
+    ):
+        limiter = RateLimiter()
+
+        result = await limiter.is_allowed("client-1")
+
+    assert result is True

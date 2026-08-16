@@ -73,4 +73,30 @@ async def test_generate_raises_llm_generation_error() -> None:
             service = LLMService()
 
             with pytest.raises(LLMGenerationError, match="LLM generation failed"):
-                await service.generate("test prompt")        
+                await service.generate("test prompt")    
+
+@pytest.mark.asyncio
+async def test_generate_raises_error_for_empty_response() -> None:
+    mock_response = MagicMock()
+    mock_response.choices = [
+        MagicMock(
+            message=MagicMock(
+                content="",
+            )
+        )
+    ]
+
+    with patch(
+        "app.services.llm.AsyncOpenAI",
+    ) as mock_client:
+        mock_client.return_value.chat.completions.create = AsyncMock(
+            return_value=mock_response,
+        )
+
+        service = LLMService()
+
+        with pytest.raises(
+            LLMGenerationError,
+            match="LLM returned an empty response",
+        ):
+            await service.generate("Test prompt")    
