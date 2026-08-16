@@ -10,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import async_session_maker, engine
 from app.models.user import User
 
-
 TEST_USER_ID = UUID("11111111-1111-1111-1111-111111111111")
 
 
