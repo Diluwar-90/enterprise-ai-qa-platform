@@ -10,10 +10,15 @@ def test_agent_query() -> None:
     with patch(
         "app.api.agent.AgentService.run",
         new=AsyncMock(
-            return_value=(
-                "The Enterprise Knowledge Intelligence Platform "
-                "is an AI-powered enterprise knowledge system."
-            ),
+           return_value={
+                "answer": (
+                    "The Enterprise Knowledge Intelligence Platform "
+                    "is an AI-powered enterprise knowledge system."
+                ),
+                "approval_required": False,
+                "approval_status": "not_required",
+                "action": "sql_read",
+            },
         ),
     ):
         client = TestClient(app)
@@ -82,3 +87,38 @@ def test_agent_query_rejects_query_over_2000_characters() -> None:
     )
 
     assert response.status_code == 422
+
+def test_agent_query_requires_hitl_approval() -> None:
+    with patch(
+        "app.api.agent.AgentService.run",
+        new=AsyncMock(
+            return_value={
+                "answer": (
+                    "Human approval is required before accessing "
+                    "sensitive data."
+                ),
+                "approval_required": True,
+                "approval_status": "pending",
+                "action": "sensitive_data_access",
+            },
+        ),
+    ):
+        client = TestClient(app)
+
+        response = client.post(
+            "/agent/query",
+            json={
+                "query": "Show me user emails",
+            },
+        )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["approval_required"] is True
+    assert data["approval_status"] == "pending"
+    assert data["action"] == "sensitive_data_access"
+    assert data["answer"] == (
+        "Human approval is required before accessing sensitive data."
+    )

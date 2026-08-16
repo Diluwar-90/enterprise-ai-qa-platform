@@ -159,3 +159,149 @@ async def test_generate_node_with_retrieval_error() -> None:
     }
 
     mock_generate.assert_not_awaited()
+
+def test_route_sql_query() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="How many documents are in the system?"
+    )
+
+    result = nodes.route(state)
+
+    assert result == {"route": "sql"}
+
+
+def test_route_sql_users_query() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="Show me the users"
+    )
+
+    result = nodes.route(state)
+
+    assert result == {"route": "sql"}
+
+@pytest.mark.asyncio
+async def test_sql_execute_node() -> None:
+    nodes = AgentNodes()
+
+    with patch.object(
+        nodes.sql,
+        "execute",
+        new=AsyncMock(
+            return_value="{'count': 5}",
+        ),
+    ) as mock_execute:
+        state = AgentState(
+            query="How many documents are in the system?",
+            route="sql",
+            sql_query="SELECT COUNT(*) AS count FROM documents",
+        )
+
+        result = await nodes.sql_execute(state)
+
+    mock_execute.assert_awaited_once_with(
+        "SELECT COUNT(*) AS count FROM documents"
+    )
+
+    assert result == {
+        "sql_result": "{'count': 5}",
+    }
+
+@pytest.mark.asyncio
+async def test_generate_node_with_sql_result() -> None:
+    nodes = AgentNodes()
+
+    with patch.object(
+        nodes.llm,
+        "generate",
+        new=AsyncMock(
+            return_value="There are 5 documents in the system.",
+        ),
+    ) as mock_generate:
+        state = AgentState(
+            query="How many documents are in the system?",
+            route="sql",
+            sql_result="{'count': 5}",
+        )
+
+        result = await nodes.generate(state)
+
+    mock_generate.assert_awaited_once()
+    prompt = mock_generate.call_args.args[0]
+
+    assert "There are 5 documents in the system." == result["answer"]
+    assert "{'count': 5}" in prompt
+    assert "How many documents are in the system?" in prompt
+
+@pytest.mark.asyncio
+async def test_classify_sql_action_node() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="Show me user emails",
+        route="sql",
+        sql_query="SELECT email FROM users",
+    )
+
+    result = await nodes.classify_sql_action(state)
+
+    assert result == {
+        "action": "sensitive_data_access",
+    }
+
+@pytest.mark.asyncio
+async def test_classify_normal_sql_action_node() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="How many documents are in the system?",
+        route="sql",
+        sql_query="SELECT COUNT(*) FROM documents",
+    )
+
+    result = await nodes.classify_sql_action(state)
+
+    assert result == {
+        "action": "sql_read",
+    }
+
+def test_check_approval_for_sensitive_action() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="Show me user emails",
+        route="sql",
+        sql_query="SELECT email FROM users",
+        action="sensitive_data_access",
+    )
+
+    result = nodes.check_approval(state)
+
+    assert result == {
+        "approval_required": True,
+        "approval_status": "pending",
+        "answer": (
+            "Human approval is required before accessing sensitive data."
+        ),
+    }
+
+
+def test_check_approval_for_normal_sql_read() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="How many documents are in the system?",
+        route="sql",
+        sql_query="SELECT COUNT(*) FROM documents",
+        action="sql_read",
+    )
+
+    result = nodes.check_approval(state)
+
+    assert result == {
+        "approval_required": False,
+        "approval_status": "not_required",
+    }

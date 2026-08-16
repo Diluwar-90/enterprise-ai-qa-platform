@@ -33,4 +33,9 @@ async def test_agent_service_run() -> None:
         }
     )
 
-    assert result == "It is an enterprise knowledge platform."
+    assert result == {
+        "answer": "It is an enterprise knowledge platform.",
+        "approval_required": False,
+        "approval_status": "not_required",
+        "action": None,
+    }   

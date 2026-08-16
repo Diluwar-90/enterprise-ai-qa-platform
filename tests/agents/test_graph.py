@@ -73,3 +73,28 @@ async def test_agent_graph_direct_route() -> None:
 
     mock_retrieve.assert_not_awaited()
     mock_generate.assert_awaited_once()
+
+@pytest.mark.asyncio
+async def test_agent_graph_sensitive_sql_requires_approval() -> None:
+    graph = build_agent_graph()
+
+    with patch(
+        "app.agents.nodes.SQLAgentService.generate_query",
+        new=AsyncMock(
+            return_value="SELECT email FROM users",
+        ),
+    ):
+        result = await graph.ainvoke(
+            {
+                "query": "Show me user emails",
+            }
+        )
+
+    assert result["route"] == "sql"
+    assert result["sql_query"] == "SELECT email FROM users"
+    assert result["action"] == "sensitive_data_access"
+    assert result["approval_required"] is True
+    assert result["approval_status"] == "pending"
+    assert result["answer"] == (
+    "Human approval is required before accessing sensitive data."
+)

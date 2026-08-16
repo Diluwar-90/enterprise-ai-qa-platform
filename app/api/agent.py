@@ -24,9 +24,12 @@ async def query_agent(
         Depends(get_agent_service),
     ],
 ) -> AgentQueryResponse:
-    answer = await agent_service.run(request.query)
+    result = await agent_service.run(request.query)
 
     return AgentQueryResponse(
-        answer=answer,
+        answer=result["answer"],
         request_id=http_request.state.request_id,
+        approval_required=result["approval_required"],
+        approval_status=result["approval_status"],
+        action=result["action"],
     )                       
