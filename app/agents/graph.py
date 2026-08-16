@@ -16,6 +16,7 @@ def build_agent_graph():
     graph.add_node("check_approval", nodes.check_approval)
     graph.add_node("sql_execute", nodes.sql_execute)
     graph.add_node("generate", nodes.generate)
+    graph.add_node("blocked", nodes.blocked)
 
     graph.add_edge(START, "route")
 
@@ -26,6 +27,7 @@ def build_agent_graph():
             "knowledge": "retrieve",
             "sql": "generate_sql",
             "direct": "generate",
+            "blocked": "blocked",
         },
     )
 
@@ -54,6 +56,7 @@ def build_agent_graph():
     graph.add_edge("sql_execute", "generate")
 
     # Final response
+    graph.add_edge("blocked", END)
     graph.add_edge("generate", END)
-
+  
     return graph.compile()

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
-Route = Literal["knowledge", "sql", "direct"]
+Route = Literal["knowledge", "sql", "direct",  "blocked",]
 
 ActionType = Literal[
     "sql_read",

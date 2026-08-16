@@ -305,3 +305,36 @@ def test_check_approval_for_normal_sql_read() -> None:
         "approval_required": False,
         "approval_status": "not_required",
     }
+
+def test_route_destructive_delete_query() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="Delete all documents from the database"
+    )
+
+    result = nodes.route(state)
+
+    assert result == {"route": "blocked"}
+
+def test_route_destructive_update_query() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="Update all user records"
+    )
+
+    result = nodes.route(state)
+
+    assert result == {"route": "blocked"}
+
+def test_route_destructive_drop_query() -> None:
+    nodes = AgentNodes()
+
+    state = AgentState(
+        query="Drop the documents table"
+    )
+
+    result = nodes.route(state)
+
+    assert result == {"route": "blocked"}

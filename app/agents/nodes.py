@@ -125,7 +125,24 @@ Question:
             "tell me",
         )
 
-        if any(keyword in query for keyword in sql_keywords):
+        destructive_keywords = (
+            "delete",
+            "remove",
+            "drop",
+            "truncate",
+            "destroy",
+            "erase",
+            "modify",
+            "change",
+            "update",
+            "insert",
+            "alter",
+            "create",
+        )
+
+        if any(keyword in query for keyword in destructive_keywords):
+            route = "blocked"
+        elif any(keyword in query for keyword in sql_keywords):
             route = "sql"
         elif query.startswith(knowledge_keywords):
             route = "knowledge"
@@ -193,4 +210,13 @@ Question:
         return {
             "approval_required": False,
             "approval_status": "not_required",
+        }
+
+    def blocked(self, state: AgentState) -> AgentState:
+        return {
+            "answer": (
+                "I cannot perform database modification or destructive "
+                "operations."
+            ),
+            "error": "Destructive database operation blocked.",
         }
