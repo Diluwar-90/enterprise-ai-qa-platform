@@ -11,6 +11,11 @@ class Settings(BaseSettings):
 
     database_url: str
     DOCUMENT_STORAGE_PATH: str = "storage/documents"
+
+    DOCUMENT_STORAGE_PROVIDER: str = "local"
+    AZURE_BLOB_STORAGE_ACCOUNT_URL: str = ""
+    AZURE_BLOB_STORAGE_CONTAINER: str = "documents"
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="ignore", case_sensitive=False
     )
