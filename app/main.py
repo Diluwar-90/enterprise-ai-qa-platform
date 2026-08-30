@@ -8,7 +8,7 @@ from app.api.documents import router as documents_router
 from app.api.rag import router as rag_router
 from app.core.config import get_settings
 from app.core.exceptions import AgentExecutionError
-from app.core.middleware import add_request_id, rate_limit_request
+from app.core.middleware import add_request_id
 from app.services.llm import LLMGenerationError
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,6 @@ app = FastAPI(
     description="Enterprise-grade GenAI platform with RAG and Agentic AI",
 )
 app.middleware("http")(add_request_id)
-app.middleware("http")(rate_limit_request)
 
 @app.exception_handler(LLMGenerationError)
 async def llm_generation_error_handler(
