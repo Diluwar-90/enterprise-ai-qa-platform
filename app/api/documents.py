@@ -12,17 +12,16 @@ from fastapi import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import get_settings
 from app.db.session import async_session_maker
 from app.db.session import get_async_session as get_db_session
 from app.models.document import Document, DocumentStatus
 from app.schemas.document import DocumentResponse
 from app.services.document_processor import DocumentProcessor
-from app.services.document_storage import LocalDocumentStorage
+from app.services.document_storage import create_document_storage
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
-storage = LocalDocumentStorage(get_settings().DOCUMENT_STORAGE_PATH)
+storage = create_document_storage()
 processor = DocumentProcessor()
 
 ALLOWED_CONTENT_TYPES = {

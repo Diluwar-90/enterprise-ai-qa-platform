@@ -12,8 +12,8 @@ class Settings(BaseSettings):
     database_url: str
     DOCUMENT_STORAGE_PATH: str = "storage/documents"
 
-    DOCUMENT_STORAGE_PROVIDER: str = "local"
-    AZURE_BLOB_STORAGE_ACCOUNT_URL: str = ""
+    DOCUMENT_STORAGE_PROVIDER: str = "azure_blob"
+    AZURE_BLOB_STORAGE_ACCOUNT_URL: str = "https://stenterpriseaiqa.blob.core.windows.net/"
     AZURE_BLOB_STORAGE_CONTAINER: str = "documents"
 
     model_config = SettingsConfigDict(

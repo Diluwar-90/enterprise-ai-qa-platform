@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 
+from app.core.config import get_settings
 from app.services.document_storage import (
     AzureBlobDocumentStorage,
     LocalDocumentStorage,
@@ -48,6 +49,7 @@ def test_create_document_storage_defaults_to_local(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
+    get_settings.cache_clear()
     monkeypatch.setenv("DOCUMENT_STORAGE_PROVIDER", "local")
     monkeypatch.setenv(
         "DOCUMENT_STORAGE_PATH",
@@ -57,6 +59,8 @@ def test_create_document_storage_defaults_to_local(
     storage = create_document_storage()
 
     assert isinstance(storage, LocalDocumentStorage)
+
+    get_settings.cache_clear()
 
 
 @pytest.mark.asyncio

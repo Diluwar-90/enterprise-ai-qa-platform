@@ -133,8 +133,6 @@ class AzureBlobDocumentStorage:
 
         return temporary_file_path
 
-        return Path(temporary_file.name)
-
     async def close(self) -> None:
         await self.client.close()
         await self.credential.close()
