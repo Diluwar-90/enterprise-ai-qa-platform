@@ -75,3 +75,14 @@ jobs:
 
       - name: Run tests
         run: uv run pytest --ignore=tests/integration
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t enterprise-ai-qa-platform:${{ github.sha }} .
