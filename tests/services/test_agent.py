@@ -22,6 +22,11 @@ async def test_agent_service_run() -> None:
     mock_redis.get = AsyncMock(return_value=None)
     mock_redis.set = AsyncMock()
 
+    mock_conversation_memory = MagicMock()
+    mock_conversation_memory.get_messages = AsyncMock(
+        return_value=[]
+    )
+
     with (
         patch(
             "app.services.agent.build_agent_graph",
@@ -31,18 +36,28 @@ async def test_agent_service_run() -> None:
             "app.services.agent.RedisService",
             return_value=mock_redis,
         ),
+        patch(
+            "app.services.agent.ConversationMemoryService",
+            return_value=mock_conversation_memory,
+        ),
     ):
         service = AgentService()
 
         result = await service.run(
-            "What is the platform?",
+            query="What is the platform?",
+            session_id="session-1",
         )
+
+    mock_conversation_memory.get_messages.assert_awaited_once_with(
+        "session-1"
+    )
 
     mock_redis.get.assert_awaited_once()
 
     mock_graph.ainvoke.assert_awaited_once_with(
         {
             "query": "What is the platform?",
+            "conversation": [],
         }
     )
 
@@ -54,6 +69,7 @@ async def test_agent_service_run() -> None:
     }
 
     mock_redis.set.assert_not_awaited()
+
 
 @pytest.mark.asyncio
 async def test_agent_service_returns_cached_response() -> None:
@@ -73,6 +89,11 @@ async def test_agent_service_returns_cached_response() -> None:
     )
     mock_redis.set = AsyncMock()
 
+    mock_conversation_memory = MagicMock()
+    mock_conversation_memory.get_messages = AsyncMock(
+        return_value=[]
+    )
+
     with (
         patch(
             "app.services.agent.build_agent_graph",
@@ -82,18 +103,28 @@ async def test_agent_service_returns_cached_response() -> None:
             "app.services.agent.RedisService",
             return_value=mock_redis,
         ),
+        patch(
+            "app.services.agent.ConversationMemoryService",
+            return_value=mock_conversation_memory,
+        ),
     ):
         service = AgentService()
 
         result = await service.run(
-            "How many documents are in the system?",
+            query="How many documents are in the system?",
+            session_id="session-1",
         )
 
     assert result == cached_response
 
+    mock_conversation_memory.get_messages.assert_awaited_once_with(
+        "session-1"
+    )
+
     mock_redis.get.assert_awaited_once()
     mock_redis.set.assert_not_awaited()
     mock_graph.ainvoke.assert_not_awaited()
+
 
 @pytest.mark.asyncio
 async def test_agent_service_caches_sql_read_response() -> None:
@@ -113,6 +144,11 @@ async def test_agent_service_caches_sql_read_response() -> None:
     mock_redis.get = AsyncMock(return_value=None)
     mock_redis.set = AsyncMock()
 
+    mock_conversation_memory = MagicMock()
+    mock_conversation_memory.get_messages = AsyncMock(
+        return_value=[]
+    )
+
     with (
         patch(
             "app.services.agent.build_agent_graph",
@@ -122,11 +158,16 @@ async def test_agent_service_caches_sql_read_response() -> None:
             "app.services.agent.RedisService",
             return_value=mock_redis,
         ),
+        patch(
+            "app.services.agent.ConversationMemoryService",
+            return_value=mock_conversation_memory,
+        ),
     ):
         service = AgentService()
 
         result = await service.run(
-            "How many documents are in the system?",
+            query="How many documents are in the system?",
+            session_id="session-1",
         )
 
     assert result == {
@@ -136,15 +177,21 @@ async def test_agent_service_caches_sql_read_response() -> None:
         "action": "sql_read",
     }
 
+    mock_conversation_memory.get_messages.assert_awaited_once_with(
+        "session-1"
+    )
+
     mock_redis.get.assert_awaited_once()
 
     mock_graph.ainvoke.assert_awaited_once_with(
         {
             "query": "How many documents are in the system?",
+            "conversation": [],
         }
     )
 
     mock_redis.set.assert_awaited_once()
+
 
 @pytest.mark.asyncio
 async def test_agent_service_continues_when_redis_get_fails() -> None:
@@ -166,6 +213,11 @@ async def test_agent_service_continues_when_redis_get_fails() -> None:
     )
     mock_redis.set = AsyncMock()
 
+    mock_conversation_memory = MagicMock()
+    mock_conversation_memory.get_messages = AsyncMock(
+        return_value=[]
+    )
+
     with (
         patch(
             "app.services.agent.build_agent_graph",
@@ -175,11 +227,16 @@ async def test_agent_service_continues_when_redis_get_fails() -> None:
             "app.services.agent.RedisService",
             return_value=mock_redis,
         ),
+        patch(
+            "app.services.agent.ConversationMemoryService",
+            return_value=mock_conversation_memory,
+        ),
     ):
         service = AgentService()
 
         result = await service.run(
-            "What is the platform?",
+            query="What is the platform?",
+            session_id="session-1",
         )
 
     assert result == {
@@ -189,12 +246,19 @@ async def test_agent_service_continues_when_redis_get_fails() -> None:
         "action": None,
     }
 
+    mock_conversation_memory.get_messages.assert_awaited_once_with(
+        "session-1"
+    )
+
     mock_redis.get.assert_awaited_once()
+
     mock_graph.ainvoke.assert_awaited_once_with(
         {
             "query": "What is the platform?",
+            "conversation": [],
         }
     )
+
 
 @pytest.mark.asyncio
 async def test_agent_service_continues_when_redis_set_fails() -> None:
@@ -216,6 +280,11 @@ async def test_agent_service_continues_when_redis_set_fails() -> None:
         side_effect=ConnectionError("Redis unavailable"),
     )
 
+    mock_conversation_memory = MagicMock()
+    mock_conversation_memory.get_messages = AsyncMock(
+        return_value=[]
+    )
+
     with (
         patch(
             "app.services.agent.build_agent_graph",
@@ -225,11 +294,16 @@ async def test_agent_service_continues_when_redis_set_fails() -> None:
             "app.services.agent.RedisService",
             return_value=mock_redis,
         ),
+        patch(
+            "app.services.agent.ConversationMemoryService",
+            return_value=mock_conversation_memory,
+        ),
     ):
         service = AgentService()
 
         result = await service.run(
-            "How many documents are in the system?",
+            query="How many documents are in the system?",
+            session_id="session-1",
         )
 
     assert result == {
@@ -239,10 +313,16 @@ async def test_agent_service_continues_when_redis_set_fails() -> None:
         "action": "sql_read",
     }
 
+    mock_conversation_memory.get_messages.assert_awaited_once_with(
+        "session-1"
+    )
+
     mock_redis.get.assert_awaited_once()
     mock_redis.set.assert_awaited_once()
+
     mock_graph.ainvoke.assert_awaited_once_with(
         {
             "query": "How many documents are in the system?",
+            "conversation": [],
         }
     )
