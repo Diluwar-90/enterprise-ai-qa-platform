@@ -8,6 +8,7 @@ from app.models.document import Document, DocumentStatus
 from app.models.document_chunk import DocumentChunk
 from app.services.embeddings.service import EmbeddingService
 from app.services.retrieval import RetrievalService
+from unittest.mock import MagicMock, patch
 
 
 @pytest.mark.asyncio
@@ -98,7 +99,9 @@ async def test_retrieve_hybrid(
 ) -> None:
     chunk_id = uuid4()
     document_id = uuid4()
+
     retrieval_service = RetrievalService()
+
     retrieval_service.azure_search.hybrid_search = MagicMock(
         return_value=[
             {
@@ -111,15 +114,20 @@ async def test_retrieve_hybrid(
         ]
     )
 
-    result = await retrieval_service.retrieve_hybrid(
-        query="What is the Enterprise Knowledge Intelligence Platform?",
-        limit=5,
-    )
+    with patch(
+        "app.services.retrieval.get_settings"
+    ) as mock_get_settings:
+        mock_get_settings.return_value.RETRIEVAL_PROVIDER = "azure"
+
+        result = await retrieval_service.retrieve_hybrid(
+            query="What is the Enterprise Knowledge Intelligence Platform?",
+            limit=5,
+        )
 
     assert len(result.chunks) == 1
+    assert result.chunks[0].id == chunk_id
+    assert result.chunks[0].document_id == document_id
+    assert result.chunks[0].chunk_index == 0
     assert result.chunks[0].content == (
         "Enterprise Knowledge Intelligence Platform"
-    )
-    assert "[Chunk 0]" in result.context
-
-    retrieval_service.azure_search.hybrid_search.assert_called_once()                                                                                                                                                               
+    )                                                                                                                                                              

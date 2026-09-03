@@ -6,7 +6,7 @@ The project is being developed incrementally as an interview-ready portfolio pro
 
 ## Current Status
 
-**Stage 9 — Production Reliability, Security & Observability: Complete**
+**Stage 11 — MCP Integration & Enterprise Tooling: Complete**
 
 Implemented and verified:
 
@@ -84,6 +84,8 @@ Implemented and verified:
 * Enterprise Retrieval
 * SQL Agent
 * Prompt-driven workflows
+* Model Context Protocol (MCP)
+* Streamable HTTP
 
 ### Security & Reliability
 
@@ -135,6 +137,12 @@ Enterprise Knowledge Intelligence Platform
 │   ├── Retrieval Tool
 │   └── SQL Tool
 │
+│
+├── Model Context Protocol (MCP)
+│   ├── Streamable HTTP MCP Server
+│   ├── Knowledge Search Tool
+│   └── Read-Only SQL Tool
+│
 ├── Security & Guardrails
 │   ├── SQL Guardrails
 │   ├── Read-Only SQL Enforcement
@@ -166,6 +174,8 @@ enterprise-knowledge-intelligence-platform/
 │   ├── api/
 │   ├── agents/
 │   │   └── tools/
+│   ├── mcp/
+│   │   └── server.py
 │   ├── core/
 │   ├── db/
 │   ├── models/
@@ -193,6 +203,17 @@ enterprise-knowledge-intelligence-platform/
 ```
 
 ## Local Development
+
+## MCP Server
+
+The platform exposes selected enterprise capabilities through the Model Context Protocol (MCP).
+
+The MCP server reuses the existing application services rather than implementing a separate retrieval or SQL layer.
+
+### Start the MCP server
+
+```bash
+uv run python -m app.mcp.server
 
 ### Requirements
 
@@ -443,7 +464,7 @@ Implemented:
 
 ### Stage 10 — Final Production Readiness
 
-Planned:
+Implemented:
 
 * Production deployment architecture
 * Kubernetes / AKS readiness
@@ -455,7 +476,19 @@ Planned:
 * Final architecture documentation
 * Final portfolio cleanup
 
-**Status: Planned**
+**Status: Complete**
+
+**Stage 11 — MCP Integration & Enterprise Tooling: Complete**
+
+Implemented:
+
+* Model Context Protocol (MCP) server
+* Streamable HTTP MCP transport
+* Enterprise knowledge search MCP tool
+* Read-only SQL MCP tool
+* MCP tool integration with existing retrieval and SQL services
+
+**Status: Complete**
 
 ## Engineering Goals
 
