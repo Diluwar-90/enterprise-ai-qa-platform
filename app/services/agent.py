@@ -57,6 +57,18 @@ class AgentService:
                 "action": result.get("action"),
             }
 
+            await self.conversation_memory.add_message(
+                session_id=session_id,
+                role="user",
+                content=query,
+            )
+
+            await self.conversation_memory.add_message(
+                session_id=session_id,
+                role="assistant",
+                content=response["answer"],
+            )
+
             if AgentCache.should_cache(response):
                 try:
                     await self.redis.set(

@@ -26,6 +26,7 @@ async def test_agent_service_run() -> None:
     mock_conversation_memory.get_messages = AsyncMock(
         return_value=[]
     )
+    mock_conversation_memory.add_message = AsyncMock()
 
     with (
         patch(
@@ -51,6 +52,8 @@ async def test_agent_service_run() -> None:
     mock_conversation_memory.get_messages.assert_awaited_once_with(
         "session-1"
     )
+
+    assert mock_conversation_memory.add_message.await_count == 2
 
     mock_redis.get.assert_awaited_once()
 
@@ -93,6 +96,7 @@ async def test_agent_service_returns_cached_response() -> None:
     mock_conversation_memory.get_messages = AsyncMock(
         return_value=[]
     )
+    mock_conversation_memory.add_message = AsyncMock()
 
     with (
         patch(
@@ -121,6 +125,8 @@ async def test_agent_service_returns_cached_response() -> None:
         "session-1"
     )
 
+    mock_conversation_memory.add_message.assert_not_awaited()
+
     mock_redis.get.assert_awaited_once()
     mock_redis.set.assert_not_awaited()
     mock_graph.ainvoke.assert_not_awaited()
@@ -148,6 +154,7 @@ async def test_agent_service_caches_sql_read_response() -> None:
     mock_conversation_memory.get_messages = AsyncMock(
         return_value=[]
     )
+    mock_conversation_memory.add_message = AsyncMock()
 
     with (
         patch(
@@ -180,6 +187,8 @@ async def test_agent_service_caches_sql_read_response() -> None:
     mock_conversation_memory.get_messages.assert_awaited_once_with(
         "session-1"
     )
+
+    assert mock_conversation_memory.add_message.await_count == 2
 
     mock_redis.get.assert_awaited_once()
 
@@ -217,6 +226,7 @@ async def test_agent_service_continues_when_redis_get_fails() -> None:
     mock_conversation_memory.get_messages = AsyncMock(
         return_value=[]
     )
+    mock_conversation_memory.add_message = AsyncMock()
 
     with (
         patch(
@@ -249,6 +259,8 @@ async def test_agent_service_continues_when_redis_get_fails() -> None:
     mock_conversation_memory.get_messages.assert_awaited_once_with(
         "session-1"
     )
+
+    assert mock_conversation_memory.add_message.await_count == 2
 
     mock_redis.get.assert_awaited_once()
 
@@ -284,6 +296,7 @@ async def test_agent_service_continues_when_redis_set_fails() -> None:
     mock_conversation_memory.get_messages = AsyncMock(
         return_value=[]
     )
+    mock_conversation_memory.add_message = AsyncMock()
 
     with (
         patch(
@@ -316,6 +329,8 @@ async def test_agent_service_continues_when_redis_set_fails() -> None:
     mock_conversation_memory.get_messages.assert_awaited_once_with(
         "session-1"
     )
+
+    assert mock_conversation_memory.add_message.await_count == 2
 
     mock_redis.get.assert_awaited_once()
     mock_redis.set.assert_awaited_once()
